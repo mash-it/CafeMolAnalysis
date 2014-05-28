@@ -14,7 +14,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # modules by mash-it
-from drip import DcdFile, NinfoFile
+from CafeMolAnalysis import DcdFile, NinfoFile
 
 parser = argparse.ArgumentParser()
 parser.add_argument("mode", type=str, help="output mode (movie or dmat)")

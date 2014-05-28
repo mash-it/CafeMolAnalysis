@@ -6,7 +6,6 @@
 """
 
 from TsFile import TsFile
-from TsFast import TsFast
 from DcdFile import DcdFile
 from NinfoFile import NinfoFile
 
