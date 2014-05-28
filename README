@@ -24,8 +24,11 @@ matplotlib (>1.3.1)
 [ Installation ]
 
 1) make PYTHONPATH to CafeMolAnalysis/lib
-2) make PATH to CafeMolAnalysis/bin
+		$ cd CafeMolAnalysis/lib
+		$ export PYTHONPATH=$PYTHONPATH:`pwd`
+	or copy/link to a directory that is in your PYTHONPATH
 
+2) make PATH to CafeMolAnalysis/bin
 
 [ cafeplot.py ]
 
