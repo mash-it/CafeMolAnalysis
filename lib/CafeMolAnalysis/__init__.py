@@ -6,6 +6,7 @@
 """
 
 from TsFile import TsFile
+from PsfFile import PsfFile
 from DcdFile import DcdFile
 from NinfoFile import NinfoFile
 
