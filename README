@@ -11,6 +11,7 @@ Analysis Tools for CafeMol
 http://www.cafemol.org/
 
 [ Operating Environment ]
+
 CafeMol 2.1
 Python 2.7.6
 
@@ -23,12 +24,13 @@ matplotlib (>1.3.1)
 
 [ Installation ]
 
-1) make PYTHONPATH to CafeMolAnalysis/lib
-		$ cd CafeMolAnalysis/lib
+1) make PYTHONPATH to ./lib
+		$ cd ./lib
 		$ export PYTHONPATH=$PYTHONPATH:`pwd`
 	or copy/link to a directory that is in your PYTHONPATH
 
-2) make PATH to CafeMolAnalysis/bin
+2) make PATH to ./bin
+	or copy/link files to a directory that is in your PATH
 
 [ cafeplot.py ]
 
@@ -41,7 +43,7 @@ step-etot plot:
 	$ cafeplot.py example.ts -y etot
 
 histogram of etot:
-	$ cafeplot.py example.ts -y etot 
+	$ cafeplot.py example.ts -y etot -b 100
 
 output png image:
 	$ cafeplot.py example.ts -o output.png
