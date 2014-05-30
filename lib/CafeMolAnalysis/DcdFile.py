@@ -61,31 +61,23 @@ class DcdFile:
 
 		return np.array((x,y,z)).T
 	
-	"""
-	def get_reg_frames(self, init = 0, last = None, freq = 1, number = None):
-		
-		if not last:
-			last = self.read_header()["frames"]
-
-		if not number:
-			if not type(freq) == int:
-				raise TypeError("freq must be integer ({} given)".format(type(freq)))
-			if freq <= 0:
-				raise ValueError("freq must be larger than 1.")
-
-			return range(init, last+1, freq)
-
-		if number:
-			if not type(number) == int:
-				raise TypeError("number must be integer ({} given)".format(type(number)))
-			if number <= 0:
-				raise ValueError("number must be larger than 1.")
-			if number > last - init:
-				raise ValueError("number is larger than frames in the range.")
-
-			freq = int(( last - init ) / number )
-			return range( init, last, freq )
-	"""
+	def write_pdb(self, frame, psf):
+		callback = ""
+		for atom in psf.atoms:
+			crd = self.read_frame(frame)
+			callback += "ATOM  {serial:5d} {atomname:4s}{altLoc:1s} {resName:3s}{chainID:1s}{resSeq:4d}{iCode:1s}   {x:8.3f}{y:8.3f}{z:8.3f}\n".format(
+				 serial = atom['atomid']
+				,atomname = atom['atomname']
+				,altLoc = ""
+				,resName = atom['resname']
+				,chainID = "A"
+				,resSeq = atom['resid']
+				,iCode = ""
+				,x = crd[atom['atomid']-1][0]
+				,y = crd[atom['atomid']-1][1]
+				,z = crd[atom['atomid']-1][2]
+			)
+		return callback
 
 	def get_contactmap(self, frame, natcont):
 		""" format of natconts: [{"imp1":int, "imp2":int, "go_nat":float}] """
