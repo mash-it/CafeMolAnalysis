@@ -11,7 +11,7 @@ step-etot plot:
 	$ cafeplot.py example.ts -y etot
 
 histogram of etot:
-	$ cafeplot.py example.ts -y etot 
+	$ cafeplot.py example.ts -y etot -b 100
 
 output png image:
 	$ cafeplot.py example.ts -o output.png
