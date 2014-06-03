@@ -48,8 +48,7 @@ if args.output != None:
 import matplotlib.pyplot as plt
 
 # read ts file
-data = TsFile(args.input)
-data.read()
+ts = TsFile(args.input)
 
 # --------------------------------------------------
 # 	set plot type
@@ -81,7 +80,7 @@ else:
 # --------------------------------------------------
 if args.bins == None:
 	# plot (normal mode)
-	plt.plot(data.data[args.x], data.data[args.y], args.type)
+	plt.plot(ts.frame[args.x], ts.frame[args.y], args.type)
 	plt.xlabel(args.x)
 	plt.ylabel(args.y)
 
@@ -96,15 +95,15 @@ if args.bins == None:
 # --------------------------------------------------
 if args.bins != None:
 	bins = args.bins
-	minY, maxY = min(data.data[args.y]), max(data.data[args.y])
+	minY, maxY = ts.frame[args.y].min(), ts.frame[args.y].max()
 	delta = (maxY - minY) / bins
 	inis = [ minY+ x*(maxY-minY)/bins for x in range(bins) ]
 	if args.xrange:
 		xbound = args.xrange.split(",")
 		condition = lambda x: x > float(xbound[0]) and x < float(xbound[1])
-		plt.hist( filter(condition, data.data[args.y]), bins )
+		plt.hist( filter(condition, ts.frame[args.y]), bins )
 	else:
-		plt.hist( data.data[args.y], bins )
+		plt.hist( ts.frame[args.y], bins )
 	plt.xlabel(args.y)
 	plt.ylabel("Freq")
 

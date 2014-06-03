@@ -7,6 +7,7 @@
 
 from TsFile import TsFile
 from PsfFile import PsfFile
+from PdbFile import PdbFile
 from DcdFile import DcdFile
 from NinfoFile import NinfoFile
 

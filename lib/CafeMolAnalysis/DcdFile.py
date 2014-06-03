@@ -25,7 +25,13 @@ class DcdFile:
 		# (other header info are not needed to read coords)
 		self.f.seek(POINTER_TO_NUMBER_OF_ATOMS)
 		self.natoms = unpack("i", self.f.read(4))[0] 
+
+		self.read_header()
 	
+	def read_header_raw(self):
+		self.f.seek(0)
+		return self.f.read(POINTER_TO_COORDINATES)
+
 	def read_header(self):
 		callback = {}
 
@@ -44,7 +50,16 @@ class DcdFile:
 			,"delta": data[10]
 		}
 
+		self.header = callback
+
 		return callback
+
+	def read_frame_raw(self, frame):
+		if frame > self.header['frames']:
+			raise RuntimeError("{}-th frame does not exist in the dcd file.".format(frame))
+
+		self.f.seek(POINTER_TO_COORDINATES + frame * 12 * (self.natoms + 2))
+		return self.f.read(12 * (self.natoms + 2))
 
 	def read_frame(self, frame):
 		try:
