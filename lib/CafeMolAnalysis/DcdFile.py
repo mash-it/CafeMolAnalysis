@@ -3,7 +3,7 @@
 
 from __future__ import print_function
 import struct
-from struct import unpack
+from struct import pack, unpack
 import numpy as np
 
 THRESHOLD_OF_CONTACT = 1.2 # native contact
@@ -46,6 +46,38 @@ class DcdFile:
 		self.f.seek(0)
 		return self.f.read(self.pointer_to_block[3])
 	
+	def write_header(self):
+		blocks = []
+
+		# first block
+		blocks.append(pack("4s9if10i",
+			"CORD",
+			self.header["frames"],
+			self.header["istart"],
+			self.header["interval"],
+			self.header["steps"],
+			self.header["units"],
+			0,0,0,0,
+			self.header["delta"],
+			0,0,0,0,0,0,0,0,0,
+			self.header["nver"]))
+
+		# second block
+		lines = len(self.header['description'].split("\n"))
+		blocks.append(pack("i{}s".format(lines * 80),
+			lines,
+			self.header['description']))
+
+		# third block
+		blocks.append(pack("i", self.natoms))
+
+		callback = b""
+		for block in blocks:
+			size = pack("i", len(block))
+			callback += size + block + size
+
+		return callback
+
 	def read_header(self):
 		callback = {}
 
@@ -61,6 +93,7 @@ class DcdFile:
 			,"steps": data[4]
 			,"units": data[5]
 			,"delta": data[10]
+			,"nver": data[20]
 		}
 
 		# second block
@@ -93,15 +126,17 @@ class DcdFile:
 			print("{key:^13s}: {value}".format(key=key, value=self.header[key]))
 
 	def read_frame_raw(self, frame):
-		if frame > self.header['frames']:
+		try:
+			self.f.seek(self.pointer_to_block[3] + frame * 12 * (self.natoms + 2))
+		except struct.error:
 			raise RuntimeError("{}-th frame does not exist in the dcd file.".format(frame))
 
-		self.f.seek(self.pointer_to_block[3] + frame * 12 * (self.natoms + 2))
 		return self.f.read(12 * (self.natoms + 2))
 
 	def read_frame(self, frame):
+		print("pointer_to_block[3]:", self.pointer_to_block[3])
 		try:
-			self.f.seek(self.pointer_to_block[3]+ frame * 12 * (self.natoms + 2))
+			self.f.seek(self.pointer_to_block[3] + frame * 12 * (self.natoms + 2))
 			self.f.seek(4, 1)
 			x = unpack("f" * self.natoms, self.f.read(4 * self.natoms))
 			self.f.seek(8, 1)
