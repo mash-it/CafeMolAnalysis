@@ -32,17 +32,18 @@ args = parser.parse_args()
 if args.mode == "movie" and args.output == None:
 	raise TypeError("Please specify output directory by -o or --output")
 
-inppath, inpfile = os.path.split(args.input)
-inppath += "./"
-
-inpfile = os.path.basename(args.input)
-filehead = inpfile.rstrip(".dcd")
-
-outpath = os.path.dirname(args.output.rstrip("/")+"/")
-
-if outpath != "":
-	outpath += "/"
-
+if args.mode == "movie":
+	inppath, inpfile = os.path.split(args.input)
+	inppath += "./"
+	
+	inpfile = os.path.basename(args.input)
+	filehead = inpfile.rstrip(".dcd")
+	
+	outpath = os.path.dirname(args.output.rstrip("/")+"/")
+	
+	if outpath != "":
+		outpath += "/"
+	
 # native contacts
 if args.ninfo == None:
 	args.ninfo = os.path.splitext(args.input)[0] + ".ninfo"
