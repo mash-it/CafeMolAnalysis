@@ -134,7 +134,6 @@ class DcdFile:
 		return self.f.read(12 * (self.natoms + 2))
 
 	def read_frame(self, frame):
-		print("pointer_to_block[3]:", self.pointer_to_block[3])
 		try:
 			self.f.seek(self.pointer_to_block[3] + frame * 12 * (self.natoms + 2))
 			self.f.seek(4, 1)

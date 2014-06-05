@@ -4,8 +4,7 @@
 from __future__ import print_function
 
 # python default modules
-import sys, argparse
-import time
+import sys, argparse, time, os
 from itertools import combinations
 import multiprocessing as mp
 
@@ -26,33 +25,36 @@ parser.add_argument("-f", "--freq", type=int, help="frequency of frames to outpu
 parser.add_argument("-n", "--number", type=int, help="total number of frames to output")
 parser.add_argument("-o", "--output", type=str, help="name of directory for output img")
 parser.add_argument("-p", "--process", type=int, help="number of process for parallel (dmat)")
+parser.add_argument("--force", action='store_true', help='execute without confirm')
 parser.add_argument("--dpi", type=float, help="dpi of output image", default=60)
 args = parser.parse_args()
 
 if args.mode == "movie" and args.output == None:
 	raise TypeError("Please specify output directory by -o or --output")
 
-filename = args.input
+inppath, inpfile = os.path.split(args.input)
+inppath += "./"
 
-print("--------------------")
+inpfile = os.path.basename(args.input)
+filehead = inpfile.rstrip(".dcd")
 
-# filename without extension
-filehead = filename.rstrip("dcd").rstrip(".")
+outpath = os.path.dirname(args.output.rstrip("/")+"/")
+
+if outpath != "":
+	outpath += "/"
 
 # native contacts
 if args.ninfo == None:
-	args.ninfo = filehead + ".ninfo"
+	args.ninfo = os.path.splitext(args.input)[0] + ".ninfo"
 natcont = NinfoFile( args.ninfo ).get_natcont()
 
 print("Open {}: {} Native Contacts".format(args.ninfo, len(natcont)))
 
 # Trajectory File
-dcd = DcdFile( filehead + ".dcd" )
+dcd = DcdFile( args.input )
 dcdhead = dcd.read_header()
 
 print("Open {}: {} Frames".format(args.input, dcdhead["frames"]))
-
-print("--------------------")
 
 # define frames to read
 if args.last == None:
@@ -70,15 +72,16 @@ else:
 	raise RuntimeError("Please specify freq (-f) or number (-n).")
 
 # confirm when too many files
-print("This procedure will read {} frames. Continue? [y]/n:".format(len(frames)), end=" ")
-while True:
-	ans = raw_input()
-	if ans in ['y', 'Y']:
-		break
-	if ans in ['n', 'N']:
-		sys.exit(1)
-	print ("Please enter y or n.")
-
+if not args.force:
+	print("This procedure will read {} frames. Continue? [y]/n:".format(len(frames)), end=" ")
+	while True:
+		ans = raw_input()
+		if ans in ['y', 'Y']:
+			break
+		if ans in ['n', 'N']:
+			sys.exit(1)
+		print ("Please enter y or n.")
+	
 # make contactmap movie
 if args.mode == "movie":
 	# contactmap of native structure 
@@ -100,8 +103,8 @@ if args.mode == "movie":
 		ax.set_title("{filehead}: {frame} frame (Q = {qscore:5.3f})"
 			.format(filehead = filehead, frame = frame, qscore = qscore))
 		ax.matshow(- contactmap + contactmap_native * 2)
-		plt.savefig("{output}/{filehead}-{frame:06d}"
-			.format(output = args.output, filehead=filehead, frame=frame), dpi=args.dpi)
+		plt.savefig("{output}/{frame:06d}"
+			.format(output = args.output, frame=frame), dpi=args.dpi)
 		plt.close()
 
 # make distance matrix
