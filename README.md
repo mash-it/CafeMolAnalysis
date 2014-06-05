@@ -68,7 +68,13 @@ Edit DCD file
 
 ```
 # reduce frames to 1/10
-dcdedit.py input.dcd 
+dcdedit.py input.dcd -e thin -n 10 -o thin.dcd
+
+# get initial 100 frames
+dcdedit.py input.dcd -e head -n 100 -o head.dcd
+
+# get last 100 frames
+dcdedit.py input.dcd -e tail -n 100 -o tail.dcd
 
 # convert to movie file (series of PDB format)
 dcdedit.py input.dcd -o output.movie
