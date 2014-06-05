@@ -6,9 +6,6 @@ import struct
 from struct import unpack
 import numpy as np
 
-POINTER_TO_NUMBER_OF_ATOMS = 428
-POINTER_TO_COORDINATES = 436
-
 THRESHOLD_OF_CONTACT = 1.2 # native contact
 
 class DcdFile:
@@ -21,27 +18,43 @@ class DcdFile:
 		if signiture != "CORD":
 			raise RuntimeError("The DCD file is broken. File Signiture: {}".format(signiture))
 
-		# number of atoms: which needed to read coords 
-		# (other header info are not needed to read coords)
-		self.f.seek(POINTER_TO_NUMBER_OF_ATOMS)
-		self.natoms = unpack("i", self.f.read(4))[0] 
-
+		self.read_header_structure()
 		self.read_header()
-	
+
+	def read_header_structure(self):
+		""" read block structure of header """	
+
+		self.f.seek(0)
+		blocksize = []
+		pointer_to_block = [4]
+
+		for i in range(3):
+			bsize = unpack("i", self.f.read(4))[0]
+			self.f.seek(bsize, 1)
+			bsize_confirm = unpack("i", self.f.read(4))[0]
+
+			if bsize != bsize_confirm:
+				raise RuntimeError("Invalid header structure")
+
+			blocksize.append(bsize)
+			pointer_to_block.append(self.f.tell())
+
+		self.blocksize = blocksize
+		self.pointer_to_block = pointer_to_block
+
 	def read_header_raw(self):
 		self.f.seek(0)
-		return self.f.read(POINTER_TO_COORDINATES)
-
+		return self.f.read(self.pointer_to_block[3])
+	
 	def read_header(self):
 		callback = {}
 
 		# first block
-		self.f.seek(0)
-		blocksize = unpack("i", self.f.read(4))[0]
+		self.f.seek(self.pointer_to_block[0])
 
-		data = unpack("4s9if10i", self.f.read(blocksize))
+		data = unpack("4s9if10i", self.f.read(self.blocksize[0]))
 
-		callback = {
+		header = {
 			 "frames": data[1]
 			,"istart": data[2]
 			,"interval": data[3]
@@ -50,21 +63,45 @@ class DcdFile:
 			,"delta": data[10]
 		}
 
-		self.header = callback
+		# second block
+		self.f.seek(self.pointer_to_block[1])
+		self.f.seek(4,1) # skip blocksize
 
-		return callback
+		# number of lines in description
+		n_lines = unpack("i", self.f.read(4))[0]
+		linesize = 80
+
+		description = []
+
+		for i in range(n_lines):
+			description.append(unpack("{}s".format(linesize), self.f.read(linesize))[0])
+
+		header["description"] = "\n".join(description)
+
+		# third block
+		self.f.seek(self.pointer_to_block[2])
+		self.f.seek(4,1) # skip blocksize
+		self.natoms = unpack("i", self.f.read(4))[0]
+
+		header["natoms"] = self.natoms
+
+		self.header = header
+		return header
+	
+	def show_header(self):
+		for key in self.header.keys():
+			print("{key:^13s}: {value}".format(key=key, value=self.header[key]))
 
 	def read_frame_raw(self, frame):
 		if frame > self.header['frames']:
 			raise RuntimeError("{}-th frame does not exist in the dcd file.".format(frame))
 
-		self.f.seek(POINTER_TO_COORDINATES + frame * 12 * (self.natoms + 2))
+		self.f.seek(self.pointer_to_block[3] + frame * 12 * (self.natoms + 2))
 		return self.f.read(12 * (self.natoms + 2))
 
 	def read_frame(self, frame):
 		try:
-			self.f.seek(POINTER_TO_COORDINATES + frame * 12 * (self.natoms + 2))
-	
+			self.f.seek(self.pointer_to_block[3]+ frame * 12 * (self.natoms + 2))
 			self.f.seek(4, 1)
 			x = unpack("f" * self.natoms, self.f.read(4 * self.natoms))
 			self.f.seek(8, 1)

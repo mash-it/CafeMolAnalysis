@@ -26,14 +26,14 @@ class TsFile:
 
 		for line in self.file:
 			items = line.split()
-			if len(items) > 0 and items[0] == "#unit":
+			if len(items) > 0 and items[0][0:5] == "#unit":
 				break
 
 		self.columns = items[1:]
 
 		self.warn = 0
 		self.table = []
-		
+
 	def readline(self, unit = "all"):
 		line = self.file.readline()
 
@@ -45,14 +45,13 @@ class TsFile:
 			items = line.split()
 
 			try:
-				#self.table = np.concatenate(self.table, np.array(items[1:]))
 				self.table.append(map(float,items[1:]))
 
 			except ValueError:
 				# show WARING if it contain invalid value (e.g. ********* )
 
 				if self.warn < self.maxwarn:
-					print ("Could not convert string to float:", file=sys.stderr)
+					print ("It could not convert string to float:", file=sys.stderr)
 					print (line, file=sys.stderr)
 
 				self.warn += 1
