@@ -26,6 +26,7 @@ parser.add_argument("-f", "--freq", type=int, help="frequency of frames to outpu
 parser.add_argument("-n", "--number", type=int, help="total number of frames to output")
 parser.add_argument("-o", "--output", type=str, help="name of directory for output img")
 parser.add_argument("-p", "--process", type=int, help="number of process for parallel (dmat)")
+parser.add_argument("--force", action='store_true', help='execute without confirm')
 parser.add_argument("--dpi", type=float, help="dpi of output image", default=60)
 args = parser.parse_args()
 
@@ -34,25 +35,24 @@ if args.mode == "movie" and args.output == None:
 
 filename = args.input
 
-print("--------------------")
+args.output = args.output.rstrip("/")
 
 # filename without extension
-filehead = filename.rstrip("dcd").rstrip(".")
+filepath = "/".join(filename.split("/")[0:-1]) + "/"
+filehead = filename.split("/")[-1].rstrip("dcd").rstrip(".")
 
 # native contacts
 if args.ninfo == None:
-	args.ninfo = filehead + ".ninfo"
+	args.ninfo = filepath + filehead + ".ninfo"
 natcont = NinfoFile( args.ninfo ).get_natcont()
 
 print("Open {}: {} Native Contacts".format(args.ninfo, len(natcont)))
 
 # Trajectory File
-dcd = DcdFile( filehead + ".dcd" )
+dcd = DcdFile( filepath + filehead + ".dcd" )
 dcdhead = dcd.read_header()
 
 print("Open {}: {} Frames".format(args.input, dcdhead["frames"]))
-
-print("--------------------")
 
 # define frames to read
 if args.last == None:
@@ -70,15 +70,16 @@ else:
 	raise RuntimeError("Please specify freq (-f) or number (-n).")
 
 # confirm when too many files
-print("This procedure will read {} frames. Continue? [y]/n:".format(len(frames)), end=" ")
-while True:
-	ans = raw_input()
-	if ans in ['y', 'Y']:
-		break
-	if ans in ['n', 'N']:
-		sys.exit(1)
-	print ("Please enter y or n.")
-
+if not args.force:
+	print("This procedure will read {} frames. Continue? [y]/n:".format(len(frames)), end=" ")
+	while True:
+		ans = raw_input()
+		if ans in ['y', 'Y']:
+			break
+		if ans in ['n', 'N']:
+			sys.exit(1)
+		print ("Please enter y or n.")
+	
 # make contactmap movie
 if args.mode == "movie":
 	# contactmap of native structure 
