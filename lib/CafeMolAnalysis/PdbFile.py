@@ -14,7 +14,6 @@ class PdbFile:
 		for line in self.file:
 			if len(line) > 4 and line[0:4] == "ATOM":
 				self.atoms.append(self.read_atomline(line))
-
 	
 	def read_atomline(self, line):
 		# to avoid IndexError
@@ -46,5 +45,3 @@ class PdbFile:
 				
 		return atom
 
-
-		
