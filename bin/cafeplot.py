@@ -93,6 +93,7 @@ if args.bins == None:
 # --------------------------------------------------
 # 	plot (histogram mode)
 # --------------------------------------------------
+
 if args.bins != None:
 	bins = args.bins
 	minY, maxY = ts.frame[args.y].min(), ts.frame[args.y].max()
@@ -110,6 +111,7 @@ if args.bins != None:
 # --------------------------------------------------
 # 	adjust range and scale
 # --------------------------------------------------
+
 if args.xlog:
 	plt.xscale("log")
 if args.ylog:
@@ -126,6 +128,8 @@ if args.yrange:
 	ymin = float(ybound[0])
 	ymax = float(ybound[1])
 	plt.ylim([ymin,ymax])
+
+plt.grid()
 
 # --------------------------------------------------
 # 	output to window or file

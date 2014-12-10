@@ -77,8 +77,8 @@ class TsFile:
 		""" get Transition Path between two state """
 		isA = conditions[0]
 		isB = conditions[1]
-		A_last = 0
-		B_last = 0
+
+		A_arrive = B_arrive = A_stay = B_stay = 0
 
 		# get initial state
 		for val in self.frame[rcoord]:
@@ -91,9 +91,38 @@ class TsFile:
 
 		AtoB = []
 		BtoA = []
+		waitingA = []
+		waitingB = []
 
 		for i, p in self.frame.iterrows():
+			now = p['step']
 
+			# back or stay A
+			if isA(p[rcoord]) and last_state == "A":
+				A_leave = now
+				
+			# arrive A
+			if isA(p[rcoord]) and last_state == "B":
+				BtoA.append(now - B_leave)
+				waitingB.append(B_leave - B_arrive)
+
+				A_arrive = A_leave = now
+				last_state = "A"
+				
+			# arrive B
+			if isB(p[rcoord]) and last_state =="A":
+				B_arrive = B_leave = now
+				last_state = "B"
+				AtoB.append(now - A_leave)
+				waitingA.append(A_leave - A_arrive)
+
+			# back or stay B
+			if isB(p[rcoord]) and last_state =="B":
+				B_leave = now
+
+		"""
+		# old version
+		for i, p in self.frame.iterrows():
 			if isA(p[rcoord]):
 				A_last = p['step']
 				if last_state == 'B':
@@ -107,8 +136,9 @@ class TsFile:
 					# A to B transition
 					AtoB.append( (A_last, p['step']) )
 					last_state = 'B'
+		"""
 
-		return (AtoB, BtoA)
+		return (AtoB, BtoA, waitingA, waitingB)
 
 	def close(self):
 		self.file.close()

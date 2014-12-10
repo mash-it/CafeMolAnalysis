@@ -58,7 +58,7 @@ Making contactmap from dcd file
 Make contactmap movie (a series of images) along trajectory
 
 ```
-cafeplot.py movie example.dcd -n 100 -o output/
+contactmap.py movie example.dcd -n 100 -o output/
 ```
 
 dcdedit.py
