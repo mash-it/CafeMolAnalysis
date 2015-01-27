@@ -9,18 +9,15 @@ from pandas import DataFrame
 
 class TsFile:
 	maxwarn = 5
-	def __init__(self, filename):
+	def __init__(self, filename, read=True):
 		self.filename = filename
 		self.file = open(self.filename)
 
 		# set header
 		self.set_header()
 
-		# read body
-		self.file.seek(0)
-		self.read()
-		self.frame = DataFrame(self.table, columns = self.columns)
-		self.frame['step'] = self.frame['step'].apply(int)
+		if read:
+			self.read()
 	
 	def set_header(self):
 		self.file.seek(0)
@@ -33,7 +30,6 @@ class TsFile:
 		self.columns = items[1:]
 
 		self.warn = 0
-		self.table = []
 
 	def readline(self, unit = "all"):
 		line = self.file.readline()
@@ -58,6 +54,9 @@ class TsFile:
 				self.warn += 1
 
 	def read(self, line = float("inf"), unit = "all"):
+		self.table = []
+		self.file.seek(0)
+
 		i = 0
 
 		while True:
@@ -72,6 +71,8 @@ class TsFile:
 				break
 
 		self.table = np.array(self.table)
+		self.frame = DataFrame(self.table, columns = self.columns)
+		self.frame['step'] = self.frame['step'].apply(int)
 
 	def getTP(self, rcoord, conditions):
 		""" get Transition Path between two state """

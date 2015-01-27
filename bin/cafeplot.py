@@ -10,6 +10,9 @@ step-qsocre plot:
 step-etot plot:
 	$ cafeplot.py example.ts -y etot
 
+multi-unit plot:
+	$ cafeplot.py example.ts --unit all,1,2
+
 histogram of etot:
 	$ cafeplot.py example.ts -y etot -b 100
 
@@ -37,6 +40,7 @@ parser.add_argument("--xlog", action="store_true", help="use log scale in X-axis
 parser.add_argument("--ylog", action="store_true", help="use log scale in Y-axis")
 parser.add_argument("--xrange", type=str, help="range of X-axis: float,float")
 parser.add_argument("--yrange", type=str, help="range of Y-axis: float,float")
+parser.add_argument("-u", "--unit", type=str, help="unit to plot: e.g. all,1,2", default='all')
 
 args = parser.parse_args()
 
@@ -47,8 +51,10 @@ if args.output != None:
 	matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-# read ts file
-ts = TsFile(args.input)
+# open ts file (not read immediately)
+ts = TsFile(args.input, read=False)
+
+units = args.unit.split(",")
 
 # --------------------------------------------------
 # 	set plot type
@@ -79,10 +85,17 @@ else:
 # 	plot (normal mode)
 # --------------------------------------------------
 if args.bins == None:
-	# plot (normal mode)
-	plt.plot(ts.frame[args.x], ts.frame[args.y], args.type)
-	plt.xlabel(args.x)
-	plt.ylabel(args.y)
+	# if two or more lines set legend
+	for unit in units:
+		ts.read(unit=unit)
+		# plot (normal mode)
+		plt.plot(ts.frame[args.x], ts.frame[args.y], args.type, label=unit)
+		plt.xlabel(args.x)
+		plt.ylabel(args.y)
+
+	# legend (Q-score)
+	if len(units) > 1:
+		plt.legend(loc='best')
 
 	# range (Q-score)
 	if args.x == "qscore":
