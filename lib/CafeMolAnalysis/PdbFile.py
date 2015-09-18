@@ -12,6 +12,7 @@ class PdbFile:
 		self.file.seek(0)
 		self.atoms = []
 		for line in self.file:
+			line = line.rstrip("\n")
 			if len(line) > 4 and line[0:4] == "ATOM":
 				self.atoms.append(self.read_atomline(line))
 	
@@ -29,7 +30,7 @@ class PdbFile:
 			,("iCode", 27,27, str)
 			,("x", 31,38, float)
 			,("y", 39,46, float)
-			,("z", 47,53, float)
+			,("z", 47,54, float)
 			,("occupancy", 55,60, float)
 			,("tempFactor", 61,66, float)
 			,("element", 77,78, str)
@@ -44,4 +45,11 @@ class PdbFile:
 				pass
 				
 		return atom
+
+	def shift(self, data, distance):
+		for atom in self.atoms:
+			atom[data] += distance
+	
+	def write_atom(self,atom):
+		return "ATOM  {serial:5} {atomname:4}{altLoc:1}{resName:3} {chainID:1}{resSeq:4}{iCode:1}   {x:8.3f}{y:8.3f}{z:8.3f}{occupancy:6.2f}{tempFactor:6.2f}          {element:2}{charge:2}".format(**atom)
 

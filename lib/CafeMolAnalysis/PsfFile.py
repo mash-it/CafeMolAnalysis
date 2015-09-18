@@ -46,5 +46,9 @@ class PsfFile:
 	
 	def read_bond(self, line):
 		items = [ int(a) for a in line.split()]
-		return [(items[0], items[1]), (items[2], items[3]), (items[4], items[5])]
+		callback = []
+
+		while len(items) > 0:
+			callback.append((items.pop(0), items.pop(0)))
+		return callback
 

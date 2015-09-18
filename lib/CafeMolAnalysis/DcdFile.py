@@ -151,7 +151,7 @@ class DcdFile:
 		callback = ""
 		for atom in psf.atoms:
 			crd = self.read_frame(frame)
-			callback += "ATOM  {serial:5d} {atomname:4s}{altLoc:1s} {resName:3s}{chainID:1s}{resSeq:4d}{iCode:1s}   {x:8.3f}{y:8.3f}{z:8.3f}\n".format(
+			callback += "ATOM  {serial:5d} {atomname:4s}{altLoc:1s}{resName:3s} {chainID:1s}{resSeq:4d}{iCode:1s}   {x:8.3f}{y:8.3f}{z:8.3f}\n".format(
 				 serial = atom['atomid']
 				,atomname = atom['atomname']
 				,altLoc = ""
