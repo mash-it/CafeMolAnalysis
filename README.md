@@ -80,3 +80,32 @@ dcdedit.py input.dcd -e tail -n 100 -o tail.dcd
 dcdedit.py input.dcd -o output.movie
 ```
 
+DcdFile
+----
+
+```python
+from CafeMolAnalysis import DcdFile, NinfoFile, PsfFile
+
+dcd = DcdFile('sample.dcd')
+ninfo = NinfoFile('sample.ninfo')
+natcont = ninfo.get_natcont()
+psf = PsfFile('sample.psf')
+
+# get header
+dcd.read_header()
+
+# get coordinates in a snapshot
+frame = 100
+dcd.read_frame(frame)
+
+# output pdb file of a snapshot
+frame = 200
+open("output.pdb").write(dcd.write_pdb(frame, psf))
+
+# get contactmap 
+frame = 0
+contactmap = dcd.get_contactmap(0, natcont) # numpy 2D array
+```
+
+
+
